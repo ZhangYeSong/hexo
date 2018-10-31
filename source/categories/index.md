@@ -1,0 +1,5 @@
+---
+title: categories
+date: 2018-11-01 00:21:42
+type: "categories"
+---
