@@ -26,6 +26,7 @@ npm install --save-dev ava
 npm install --save-dev superkoa
 ```
 下面是我项目的package.json文件的依赖，其中mount-koa-routes是一个自动读取routes文件的框架，可以不用。
+<!-- more -->
 ```
 "dependencies": {
     "debug": "^2.6.3",
