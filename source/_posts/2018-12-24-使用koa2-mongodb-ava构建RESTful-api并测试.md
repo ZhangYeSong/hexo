@@ -11,7 +11,7 @@ tags:
 ---
 > 初涉nodejs后台开发，在得知express和koa是同一个团队开发之后果断选择了更前沿的koa2试水。结果发现koa生态是真的不成熟啊，不过开发起来也更有意思。
 
-###安装依赖
+### 安装依赖
 此次我们使用koa-generator作为脚手架创建项目，这个也不是官方脚手架，大家熟悉了可以随便改。
 ```
 npm install koa-generator -g
@@ -50,7 +50,7 @@ npm install --save-dev superkoa
     "superkoa": "^1.0.3",
   }
 ```
-###定义数据库连接和Schema对象
+### 定义数据库连接和Schema对象
 此次我们要做的api是做一个能够增删改查分类的api。MongoDB是这几年非常火爆的一个nosql数据库。在尝试过后确实赶紧nosql很爽。MongoDB的学习资料建议看这个：http://www.runoob.com/mongodb/mongodb-tutorial.html
 搭建一个MongoDB数据库要比Mysql和OracleDB快多了。
 我们使用mongoose.js来处理MongoDB的相关操作。mongoose.js可以看作是nodejs上MongoDB的ORM框架，和java后端的hibernate以及android端的greenDAO类似。有过ORM框架经验的上手非常容易。具体的mongoose学习看官网就非常好：https://mongoosejs.com/
@@ -93,7 +93,7 @@ name记录分类的名字。
 parent记录分类的上级分类。
 level记录分类的层级。
 定义好Schema之后，创建model类然后export出去。
-###撰写RESTful api
+### 撰写RESTful api
 RESTful api设计风格越来越流行，接口不做成RESTful怎么行呢？
 我所掌握的RESTful api有以下两个要点：
 - url要使用表示资源的名字，比如我这里就是category或categories，尽量不要使用动词。
@@ -197,7 +197,7 @@ module.exports = router;
 ```
 可以看到mongoose处理数据库的增删改查请求都是异步，使用es7的await语句做异步是不是非常的爽？
 
-###单元测试
+### 单元测试
 单元测试可以帮助发现很大比例的bug，ava是一新一代的nodejs测试框架，可以异步测试（虽然这次我需要的是同步- -）具体的使用说明可以看官方github主页：https://github.com/avajs/ava
 在写测试代码的时候尴尬了，我们请求接口是异步，执行测试用例也是异步，但是对category四个接口的测试我是想有顺序地执行的（比如我得先创建一个测试分类然后才能修改、查询、删除，没有顺序的话没办法每次跑单元测试都通过）。棘手的是我好像并想不到同步执行单元测试的方法- -最后还是查询官方文档得知的，在test后面加上.serial即可。看来ava还是为我们考虑到了这一点的。superkoa是基于supertest的做的一个可以让我们在ava测试代码里调用koa的框架，使用起来非常的简单。
 新建一个test文件夹，添加一个test.js文件，全部的测试代码如下：

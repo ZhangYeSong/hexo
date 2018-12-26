@@ -11,7 +11,6 @@ tags:
 
 ### 大致思路
 先说下，这个python脚本是根据BrainZou在github上的代码改写的https://github.com/BrainZou/PythonSpider/tree/master/Gerrit，非常感谢这位仁兄，不然我今天肯定下不了班了- -
-<!-- more -->
 
 用chrome打开gerrit，F12打开开发者工具点击Network->XHR可以看到页面的HTTP请求，没有就刷新一下，如下图：
 ![查找页面请求](https://upload-images.jianshu.io/upload_images/5586297-2b240b7905be7b60.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -30,12 +29,12 @@ import re
 import csv
 
 #gerrit的默认url是下面这个url，然后下一页按钮的url是这个url加上这一页最后一项的_sortkey(形如0049b98c0000f3b8)
-UNMERGE_URL = 'https://gerrit-sin.parrot.biz/changes/?n=25&O=1'
-MERGED_URL = 'https://gerrit-sin.parrot.biz/changes/?q=status:merged&n=25&O=1'
+UNMERGE_URL = 'https://gerrit-sin.xxx.biz/changes/?n=25&O=1'
+MERGED_URL = 'https://gerrit-sin.xxx.biz/changes/?q=status:merged&n=25&O=1'
 
 #用来判断是哪个项目组添加的comment
-TS_IDS = [9,10,11,12,13,16,22]
-PARROT_IDS = [2,5]
+OUR_IDS = [9,10,11,12,13,16,22]
+CUSTOMERS_IDS = [2,5]
 
 
 
@@ -73,32 +72,32 @@ def requesst(url,limit_time,start,merged):
 
                 #获取未merge代码的预估review时间
                 if(merged != True):
-                    advice_url = "https://gerrit-sin.parrot.biz/changes/"+str(one["_number"])+"/revisions/1/reviewassistant~advice"
+                    advice_url = "https://gerrit-sin.xxx.biz/changes/"+str(one["_number"])+"/revisions/1/reviewassistant~advice"
                     advice_data = requests.get(advice_url, headers=headers, verify=True).text
                     advice_data = re.sub(remove, "", advice_data)
                     estimated = advice_data[advice_data.index("\\u003cstrong\\u003e")+len("\\u003cstrong\\u003e"):advice_data.index("\\u003c/strong\\u003e reviewing")]
 
                 #获取commit的comment信息
-                comment_url = "https://gerrit-sin.parrot.biz/changes/"+str(one["_number"])+"/comments"
+                comment_url = "https://gerrit-sin.xxx.biz/changes/"+str(one["_number"])+"/comments"
                 comment_data = requests.get(comment_url, headers=headers, verify=True).text
                 comment_data = re.sub(remove, "", comment_data)
                 comment_dict = json.loads(comment_data)
 
 
-                ts_size, parrot_size = get_comment_size(comment_dict)
-                print("comment size = " + str(ts_size) + ":" + str(parrot_size))
+                ts_size, customer_size = get_comment_size(comment_dict)
+                print("comment size = " + str(ts_size) + ":" + str(customer_size))
 
                 #将数据写入表格中
                 writer.writerow([
                     owner, 
                     project[project.rfind("/"):],
                     one["subject"],
-                    "https://gerrit-sin.parrot.biz/"+str(one["_number"]),
+                    "https://gerrit-sin.xxx.biz/"+str(one["_number"]),
                     one["insertions"],
                     one["deletions"],
                     "NA" if merged==True else estimated,
-                    parrot_size + ts_size,
-                    parrot_size,
+                    customer_size + ts_size,
+                    customer_size,
                     ts_size,
                     merged
                 ])
@@ -108,12 +107,12 @@ def requesst(url,limit_time,start,merged):
                     owner, 
                     project[project.rfind("/"):],
                     one["subject"],
-                    "https://gerrit-sin.parrot.biz/"+str(one["_number"]),
+                    "https://gerrit-sin.xxx.biz/"+str(one["_number"]),
                     one["insertions"],
                     one["deletions"],
                     "NA" if merged==True else estimated,
-                    parrot_size + ts_size,
-                    parrot_size,
+                    customer_size + ts_size,
+                    customer_size,
                     ts_size,
                     merged
                 )
@@ -122,31 +121,31 @@ def requesst(url,limit_time,start,merged):
 #通过id获取owner姓名
 def get_owner(account_id):
     return {
-        1: 'Florent-Xavier Perrin',
-        5: 'Omar Akrout',
-        9: 'Wenping Wang',
-        10: 'Wang Kui',
-        11: 'Guoruyi',
-        12: 'Hongliang',
-        13: 'Zhangwei',
-        16: 'Di Jin',
-        22: 'Fengyou'
+        1: 'memer1',
+        5: 'member5',
+        9: 'member9',
+        10: 'member10',
+        11: 'member11',
+        12: 'member12',
+        13: 'member13',
+        16: 'member16',
+        22: 'member22'
     }.get(account_id, 'error')
 
 #解析comment json获取comment个数
 def get_comment_size(comment_dict):
     ts_size = 0
-    parrot_size = 0
+    customer_size = 0
 
     for k,v in comment_dict.items():
         for comment in v:
             _account_id = comment["author"]["_account_id"]
             if(_account_id in TS_IDS):
                 ts_size += 1
-            if(_account_id in PARROT_IDS):
-                parrot_size += 1
+            if(_account_id in CUSTOMER_IDS):
+                customer_size += 1
         
-    return ts_size, parrot_size
+    return ts_size, customer_size
 
 
 #对时间"2017-12-11 02:07:27.000000000"格式化为20171211020727
@@ -172,7 +171,7 @@ def main():
     with open("gerrit_commits.csv", "w",newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Owner", "Module", "Title", "Gerrit link", "Insertions", "Deletions",
-            "Gerrit estimated review time", "Total comments", "Total Parrot comments",
+            "Gerrit estimated review time", "Total comments", "Total Customer comments",
             "Total TS comments", "Merged"])
     # 循环爬下一页
     while (continue_flag):
